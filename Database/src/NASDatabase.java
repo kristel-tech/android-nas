@@ -37,7 +37,7 @@ public class NASDatabase {
     }
     //this function returns all the records of file transfers of a single device
     //the device that requests this function can have its IP address sourced by a WifiManager object
-    public void ShowFileHistory(String OwnIPAddress) {
+    public void ShowFileHistory(String OwnIPAddress)  throws SQLException {
         try {
             connection = DriverManager.getConnection(DatabaseURL, user, password);
             statement = connection.createStatement();
@@ -55,7 +55,7 @@ public class NASDatabase {
     }
     //this function returns all the records of file transfers from a single date from a device
     //the device that requests this function can have its IP address sourced by a WifiManager object
-    public void ShowFilesByDate(String OwnIPAddress, LocalDateTime filedate) {
+    public void ShowFilesByDate(String OwnIPAddress, LocalDateTime filedate)  throws SQLException {
         try {
             connection = DriverManager.getConnection(DatabaseURL, user, password);
             statement = connection.createStatement();
@@ -78,7 +78,7 @@ public class NASDatabase {
            connection = DriverManager.getConnection(DatabaseURL, user, password);
            statement = connection.createStatement();
            String SQLQuery = "INSERT INTO FileHistory(SenderIP,ReceiverIP,FileSizeInMegabytes,DateSent,FileName) VALUES(" + SenderIP + ", " + ReceiverIP + ", " + FileSizeInMegabytes + ", " + local + ", " + filename + ");";
-           resultset = statement.executeQuery(SQLQuery);
+           statement.executeUpdate(SQLQuery);
        }
        catch (SQLException sqlEx) {
            sqlEx.printStackTrace();
