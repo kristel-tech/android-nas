@@ -1,5 +1,7 @@
 package com.example.myapplication;
 
+import android.os.Environment;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -50,7 +52,24 @@ public class httphandle extends Thread {
                 if (httpQueryString.equals("/")) {
                     // The default home page
                     sendResponse(200, responseBuffer.toString(), false);
-                } else {
+                }
+                else if (httpQueryString.equals("/List")){
+
+                    String filesPath = Environment.getExternalStorageDirectory().getAbsolutePath().toString();
+//                    Log.d("Files", "Path: " + path);
+                    File directory = new File(filesPath);
+                    File[] files = directory.listFiles();
+//
+                    String returnString = new String();
+                    int file_size = 0;
+                    for (int i = 0; i < files.length; i++)
+                    {
+                        returnString += "<p>FileName:" + files[i].getName() + "<p><br>" ;
+//
+                    }
+                        sendResponse(200, returnString, false);
+                }
+                else {
                     // This is interpreted as a file name
                     String fileName = httpQueryString.replaceFirst("/", "");
                     fileName = URLDecoder.decode(fileName);
