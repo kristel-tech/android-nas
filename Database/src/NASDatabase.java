@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 
 
 public class NASDatabase {
-    private static final String DatabaseURL = "jdbc:mysql://sql10.freemysqlhosting.net:3306/sql10406521";
-    private static final String user = "sql10406521";
-    private static final String password = "DDup1ZBbEw";
+    private static final String DatabaseURL = "jdbc:mysql://localhost:3306/java";
+    private static final String user = "root";
+    private static final String password = "";
     private static Connection connection;
     private static Statement statement;
     private static ResultSet resultset;
@@ -18,7 +18,6 @@ public class NASDatabase {
 
     public void ShowFilesByDeviceID(String DeviceIPAddress, String OwnIPAddress) throws SQLException {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection(DatabaseURL, user, password);
             String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = ? AND ReceiverIP = ?) OR ReceiverIP = ? AND SenderIP = ?;";
             PreparedStatement identity = connection.prepareStatement(SQLQuery);
@@ -32,8 +31,6 @@ public class NASDatabase {
             }
         } catch (SQLException sqlEx) {
             sqlEx.printStackTrace();
-        }catch(Exception e){
-            System.out.println("we are not flying");
         }
         finally {
             closeConnection();
