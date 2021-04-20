@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 
 public class home {
@@ -15,7 +16,7 @@ public class home {
 
         //public void CreateFileRecord(String SenderIP, String ReceiverIP, double FileSizeInMegabytes, LocalDateTime local, String filename) throws SQLException 
         try{
-        hold.CreateFileRecord("tttttt", "ttttt", 3.3, LocalDateTime.now(), "bihhhh");
+        hold.CreateFileRecord("tttttt", "ttttt", 3.3, "bihhhh");
         }
         catch(Exception e ){
             System.out.println("shit happans");

@@ -1,17 +1,13 @@
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
 public class NASDatabase {
-    private static final String DatabaseURL = "jdbc:mysql://localhost:3306/java";
-    private static final String user = "root";
-    private static final String password = "";
+    private static final String DatabaseURL = "jdbc:mysql://sql10.freemysqlhosting.net:3306/sql10406521";
+    private static final String user = "sql10406521";
+    private static final String password = "DDup1ZBbEw";
     private static Connection connection;
     private static Statement statement;
     private static ResultSet resultset;
@@ -24,9 +20,13 @@ public class NASDatabase {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection(DatabaseURL, user, password);
-            statement = connection.createStatement();
-            String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = " + DeviceIPAddress + " AND ReceiverIP = " + OwnIPAddress + ") OR ReceiverIP = " + DeviceIPAddress + " AND SenderIP = " + OwnIPAddress + ";";
-            resultset = statement.executeQuery(SQLQuery);
+            String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = ? AND ReceiverIP = ?) OR ReceiverIP = ? AND SenderIP = ?;";
+            PreparedStatement identity = connection.prepareStatement(SQLQuery);
+            identity.setString(1, OwnIPAddress);
+            identity.setString(2, DeviceIPAddress);
+            identity.setString(3, OwnIPAddress);
+            identity.setString(4, DeviceIPAddress);
+            resultset = identity.executeQuery(SQLQuery);
             while (resultset.next()) {
                 System.out.println(resultset.next());
             }
@@ -44,9 +44,11 @@ public class NASDatabase {
     public void ShowFileHistory(String OwnIPAddress)  throws SQLException {
         try {
             connection = DriverManager.getConnection(DatabaseURL, user, password);
-            statement = connection.createStatement();
-            String SQLQuery = "SELECT * FROM FileHistory WHERE SenderIP = " + OwnIPAddress + " OR ReceiverIP = " + OwnIPAddress + ";";
-            resultset = statement.executeQuery(SQLQuery);
+            String SQLQuery = "SELECT * FROM FileHistory WHERE SenderIP = ? OR ReceiverIP = ?;";
+            PreparedStatement filehistory = connection.prepareStatement(SQLQuery);
+            filehistory.setString(1, OwnIPAddress);
+            filehistory.setString(2, OwnIPAddress);
+            resultset = filehistory.executeQuery(SQLQuery);
             while (resultset.next()) {
                 System.out.println(resultset.next());
             }
@@ -59,12 +61,15 @@ public class NASDatabase {
     }
     //this function returns all the records of file transfers from a single date from a device
     //the device that requests this function can have its IP address sourced by a WifiManager object
-    public void ShowFilesByDate(String OwnIPAddress, LocalDateTime filedate)  throws SQLException {
+    public void ShowFilesByDate(String OwnIPAddress, Timestamp filedate)  throws SQLException {
         try {
             connection = DriverManager.getConnection(DatabaseURL, user, password);
-            statement = connection.createStatement();
-            String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = " + OwnIPAddress + " OR ReceiverIP = " + OwnIPAddress + ") AND DateSent = " + filedate + ";";
-            resultset = statement.executeQuery(SQLQuery);
+            String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND DateSent = ?;";
+            PreparedStatement datesearch = connection.prepareStatement(SQLQuery);
+            datesearch.setString(1, OwnIPAddress);
+            datesearch.setString(2, OwnIPAddress);
+            datesearch.setTimestamp(3, filedate);
+            resultset = datesearch.executeQuery(SQLQuery);
             while (resultset.next()) {
                 System.out.println(resultset.next());
             }
@@ -77,7 +82,7 @@ public class NASDatabase {
     }
     //this function records when a file transfer between two devices takes place
 
-    public void CreateFileRecord(String SenderIP, String ReceiverIP, double FileSizeInMegabytes, LocalDateTime local, String filename) throws SQLException {
+    public void CreateFileRecord(String SenderIP, String ReceiverIP, double FileSizeInMegabytes, String filename) throws SQLException {
        try {
            connection = DriverManager.getConnection(DatabaseURL, user, password);
            
