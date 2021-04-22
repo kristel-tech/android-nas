@@ -40,7 +40,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        NASDatabase DBInst = new NASDatabase();
+        DatabaseInfo DBDataInst = new DatabaseInfo();
+        DBDataInst.SQLCall(DBCallType.CREATE);
+//        SenderIP,ReceiverIP, FileSizeInMegabytes,FileName
+        DBDataInst.setFileHistoryPostData("king khutjo", "master khutjo", "10.2", null, "RuleTheWorld.EXE");
+        System.out.println(DBDataInst.getRequestFileHistoryData());
+        NASDatabase DBInst = new NASDatabase(DBDataInst);
         DBInst.execute();
 
     }

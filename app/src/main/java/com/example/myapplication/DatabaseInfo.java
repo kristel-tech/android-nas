@@ -11,39 +11,44 @@ public class DatabaseInfo {
 
     final String strMessage = "https://phpjavapass.000webhostapp.com/";
     private String SQL;
+    private DBCallType callType;
     private String SenderIP;
     private String ReceiverIP;
     private String FileSizeInMegabytes;
     private String DateSent;
+    private String FileName;
     private String result;
     public boolean ReceivedResult;
     public boolean ReceivedError;
 
     public DatabaseInfo(){
         this.SQL = null;
-
+        this.callType = DBCallType.EMPTY;
         this.SenderIP = null;
         this.ReceiverIP = null;
         this.FileSizeInMegabytes = null;
         this.DateSent = null;
+        this.FileName = null;
         this.result = null;
         ReceivedResult = false;
         ReceivedError = false;
     }
 
-    public void SQLCall(String CallType){
+
+    public void SQLCall(DBCallType CallType){
+        this.callType = CallType;
         switch(CallType){
-            case "FilesByDate":
+            case FILESBYDATE:
                 SQL = encodeValue("SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND DateSent = ? ORDER BY DateSent DESC;");
                 break;
-            case "ShowFileHistory":
+            case SHOWFILEHISTORY:
                 SQL = encodeValue("SELECT * FROM FileHistory WHERE SenderIP = ? OR ReceiverIP = ? ORDER BY DateSent DESC;");
                 break;
-            case "ByDeviceID":
+            case BYDEVICEID:
                 SQL = encodeValue("SELECT * FROM FileHistory WHERE (SenderIP = ? AND ReceiverIP = ?) OR ReceiverIP = ? AND SenderIP = ? ORDER BY DateSent DESC;");
                 break;
-            case "create":
-                SQL = encodeValue("INSERT INTO FileHistory(SenderIP, ReceiverIP, FileSizeInMegabytes, DateSent, FileName) VALUES (?,?,?,CURRENT_TIMESTAMP,?) ORDER BY DateSent DESC;");
+            case CREATE:
+                SQL = encodeValue("INSERT INTO FileHistory(SenderIP, ReceiverIP, FileSizeInMegabytes, DateSent, FileName) VALUES (?,?,?,CURRENT_TIMESTAMP,?);");
                 break;
         }
     }
@@ -63,15 +68,46 @@ public class DatabaseInfo {
         return result;
     }
 
-    public void setFileHistoryPostData(String SenderIP , String ReceiverIP, String FileSizeInMegabytes, String DateSent){
+    public void setFileHistoryPostData(String SenderIP , String ReceiverIP, String FileSizeInMegabytes, String DateSent, String FileName){
         this.SenderIP = SenderIP;
         this.ReceiverIP = ReceiverIP;
         this.FileSizeInMegabytes = FileSizeInMegabytes;
         this.DateSent = DateSent;
+        this.FileName = FileName;
+    }
+
+    private String CompileString(String... values){
+        String concat = "";
+        int index = 0;
+        for(String s:values){
+            concat += "&value" + String.valueOf(index++) + "=" + encodeValue(s);
+        }
+        return "&len=" + String.valueOf(index) + concat;
     }
 
     public String getRequestFileHistoryData(){
-        return strMessage+"?SenderIP="+SenderIP+"&ReceiverIP="+ReceiverIP+"&FileSizeInMegabytes="+FileSizeInMegabytes+"&DateSent="+DateSent;
+        String values = "";
+
+        switch(callType){
+            case FILESBYDATE:
+                values = CompileString(SenderIP,ReceiverIP, DateSent);
+//                        SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND DateSent = ? ORDER BY DateSent DESC;
+                break;
+            case SHOWFILEHISTORY:
+                values = CompileString(SenderIP,ReceiverIP, DateSent);
+//                        SELECT * FROM FileHistory WHERE SenderIP = ? OR ReceiverIP = ? ORDER BY DateSent DESC;
+                break;
+            case BYDEVICEID:
+                values = CompileString(SenderIP,ReceiverIP, SenderIP,ReceiverIP);
+//                        SELECT * FROM FileHistory WHERE (SenderIP = ? AND ReceiverIP = ?) OR ReceiverIP = ? AND SenderIP = ? ORDER BY DateSent DESC;
+                break;
+            case CREATE:
+                values = CompileString(SenderIP,ReceiverIP, FileSizeInMegabytes,FileName);
+//                        INSERT INTO FileHistory(SenderIP, ReceiverIP, FileSizeInMegabytes, DateSent, FileName) VALUES (?,?,?,CURRENT_TIMESTAMP,?) ORDER BY DateSent DESC;
+                break;
+        }
+
+        return strMessage+"?SQL="+SQL+values;
     }
 
     public static String decodeValue(String value) {
