@@ -1,123 +1,58 @@
 package com.example.myapplication;
 
-import java.io.File;
-import java.sql.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import android.os.AsyncTask;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+//useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=GMT"
 
 
-public class NASDatabase {
-    private static final String DatabaseURL = "jdbc:mysql://localhost:3306/java";
-    private static final String user = "root";
-    private static final String password = "";
-    private static Connection connection;
-    private static Statement statement;
-    private static ResultSet resultset;
 
-    //this function returns the records of file transfers between two devices
-    //the device that requests this function can have its IP address sourced by a WifiManager object,
-    // while the IP address of the other device must be provided
 
-    public void ShowFilesByDeviceID(String DeviceIPAddress, String OwnIPAddress) throws SQLException {
+
+public class NASDatabase  extends AsyncTask<Void, Void, Void> {
+
+    DatabaseInfo DBInfo;
+
+    public NASDatabase(DatabaseInfo DBInfo){
+        this.DBInfo = DBInfo;
+    }
+
+
+    String result;
+    @Override
+    protected Void doInBackground(Void... voids) {
+        URL url;
         try {
-            connection = DriverManager.getConnection(DatabaseURL, user, password);
-            String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = ? AND ReceiverIP = ?) OR ReceiverIP = ? AND SenderIP = ?;";
-            PreparedStatement identity = connection.prepareStatement(SQLQuery);
-            identity.setString(1, OwnIPAddress);
-            identity.setString(2, DeviceIPAddress);
-            identity.setString(3, OwnIPAddress);
-            identity.setString(4, DeviceIPAddress);
-            resultset = identity.executeQuery(SQLQuery);
-            while (resultset.next()) {
-                System.out.println(resultset.next());
+            url = new URL(DBInfo.getRequestFileHistoryData());
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(url.openStream()));
+            String stringBuffer;
+            String string = "";
+            while ((stringBuffer = bufferedReader.readLine()) != null){
+                string = String.format("%s%s", string, stringBuffer);
             }
-        } catch (SQLException sqlEx) {
-            sqlEx.printStackTrace();
+            bufferedReader.close();
+            DBInfo.SetResult(string);
+        } catch (IOException e){
+            e.printStackTrace();
+            DBInfo.SetErrorResult(e.toString());
         }
-        finally {
-            closeConnection();
-        }
+        return null;
     }
-    //this function returns all the records of file transfers of a single device
-    //the device that requests this function can have its IP address sourced by a WifiManager object
-    public void ShowFileHistory(String OwnIPAddress)  throws SQLException {
-        try {
-            connection = DriverManager.getConnection(DatabaseURL, user, password);
-            String SQLQuery = "SELECT * FROM FileHistory WHERE SenderIP = ? OR ReceiverIP = ?;";
-            PreparedStatement FileHistory = connection.prepareStatement(SQLQuery);
-            FileHistory.setString(1, OwnIPAddress);
-            FileHistory.setString(2, OwnIPAddress);
-            resultset = FileHistory.executeQuery(SQLQuery);
-            while (resultset.next()) {
-                System.out.println(resultset.next());
-            }
-        } catch (SQLException sqlEx) {
-            sqlEx.printStackTrace();
-        }
-        finally {
-            closeConnection();
-        }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        System.out.println(result);
+        super.onPostExecute(aVoid);
     }
-    //this function returns all the records of file transfers from a single date from a device
-    //the device that requests this function can have its IP address sourced by a WifiManager object
-    public void ShowFilesByDate(String OwnIPAddress, Timestamp filedate)  throws SQLException {
-        try {
-            connection = DriverManager.getConnection(DatabaseURL, user, password);
-            String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND DateSent = ?;";
-            PreparedStatement datesearch = connection.prepareStatement(SQLQuery);
-            datesearch.setString(1, OwnIPAddress);
-            datesearch.setString(2, OwnIPAddress);
-            datesearch.setTimestamp(3, filedate);
-            resultset = datesearch.executeQuery(SQLQuery);
-            while (resultset.next()) {
-                System.out.println(resultset.next());
-            }
-        } catch (SQLException sqlEx) {
-            sqlEx.printStackTrace();
-        }
-        finally {
-            closeConnection();
-        }
-    }
-    //this function records when a file transfer between two devices takes place
 
-    public void CreateFileRecord(String SenderIP, String ReceiverIP, double FileSizeInMegabytes, String filename) throws SQLException {
-        try {
-            connection = DriverManager.getConnection(DatabaseURL, user, password);
 
-            String SQLQuery =  "INSERT INTO FileHistory(SenderIP, ReceiverIP, FileSizeInMegabytes, DateSent, FileName) VALUES (?,?,?,CURRENT_TIMESTAMP,?);";
-
-            PreparedStatement updatefilehistory = connection.prepareStatement(SQLQuery);
-            updatefilehistory.setString(1, SenderIP);
-            updatefilehistory.setString(2, ReceiverIP);
-            updatefilehistory.setDouble(3, FileSizeInMegabytes);
-            updatefilehistory.setString(4, filename);
-            updatefilehistory.executeUpdate();
-
-        }
-        catch (SQLException sqlEx) {
-            sqlEx.printStackTrace();
-        }
-
-    }
-    public void closeConnection() {
-        try {
-            connection.close();
-        }
-        catch(SQLException se) {
-            se.printStackTrace();
-        }
-        try {
-            statement.close();
-        }
-        catch(SQLException se) {
-            se.printStackTrace();
-        }
-        try {
-            resultset.close();
-        }
-        catch(SQLException se) {
-            se.printStackTrace();
-        }
-    }
 }
+
+
+
+
+
+
