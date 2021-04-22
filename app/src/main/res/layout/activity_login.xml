@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="148dp"
         android:layout_marginTop="64dp"
-        android:text="Sign up"
+        android:text="LOGIN"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextTextPassword" />
 
@@ -46,7 +46,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="92dp"
         android:layout_marginBottom="124dp"
-        android:text="Don't have an account? sign un here "
+        android:text="Don't have an account? Sign up here"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

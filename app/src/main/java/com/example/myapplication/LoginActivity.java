@@ -39,18 +39,15 @@ public class LoginActivity extends AppCompatActivity {
         userPassword =findViewById(R.id.editTextTextPassword);
         signInButton= findViewById(R.id.button2);
 
-        authenticationStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser instanceFireBaseUser = authenticationObject.getCurrentUser();
+        authenticationStateListener = firebaseAuth -> {
+            FirebaseUser instanceFireBaseUser = authenticationObject.getCurrentUser();
 
-                if (instanceFireBaseUser != null) {
-                    Toast.makeText(LoginActivity.this, "You have successfully Logged in", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent( LoginActivity.this , HomeActivity.class);
-                    startActivity(intent);
-                }else {
-                    Toast.makeText(LoginActivity.this, "Please Login ", Toast.LENGTH_SHORT).show();
-                }
+            if (instanceFireBaseUser != null) {
+                Toast.makeText(LoginActivity.this, "You have successfully Logged in", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent( LoginActivity.this , HomeActivity.class);
+                startActivity(intent);
+            }else {
+                Toast.makeText(LoginActivity.this, "Please Login ", Toast.LENGTH_SHORT).show();
             }
         };
         //after clicking sign in button
@@ -74,15 +71,19 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, "fields are emtpy", Toast.LENGTH_SHORT).show();
                 }
                 else if (!(email.isEmpty() && pwd.isEmpty())){
-                    authenticationObject.createUserWithEmailAndPassword(email,pwd).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
-                        //after successful process procede to do
+                    authenticationObject.signInWithEmailAndPassword(email,pwd).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (!task.isSuccessful()){//or check if successful
-                                Toast.makeText(LoginActivity.this, "task failure", Toast.LENGTH_SHORT).show();
-                            }else {
-                                startActivity(new Intent(LoginActivity.this, HomeActivity.class));
-                            }
+                       if (!task.isSuccessful()){
+                           Toast.makeText(LoginActivity.this, "Login Failure , please try again or not!! ", Toast.LENGTH_SHORT).show();
+                           Intent advanceHome = new Intent (LoginActivity.this, FirstPageActivity.class);
+                           startActivity(advanceHome);
+                       }
+                       else{
+                           Toast.makeText(LoginActivity.this, "Login Successful!! ", Toast.LENGTH_SHORT).show();
+                           Intent advanceHome = new Intent (LoginActivity.this, HomeActivity.class);
+                           startActivity(advanceHome);
+                       }
                         }
                     });
                 }
@@ -92,5 +93,20 @@ public class LoginActivity extends AppCompatActivity {
 
             }
         });
+
+        signUpPageText.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent advanceToSignUp = new Intent (LoginActivity.this, FirstPageActivity.class);
+                startActivity(advanceToSignUp);
+            }
+        });
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        authenticationObject.addAuthStateListener(authenticationStateListener);
     }
 }

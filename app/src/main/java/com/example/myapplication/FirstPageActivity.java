@@ -38,8 +38,9 @@ public class FirstPageActivity extends AppCompatActivity {
         signUpButton.setOnClickListener(new View.OnClickListener() {//lambda this son of a gun
             @Override
             public void onClick(View view){
-                String email = emailUserID.getText().toString();
-                String pwd= userPassword.getText().toString();
+                String email = emailUserID.getText().toString().trim();
+                String pwd= userPassword.getText().toString().trim();
+
 
                 //object vailidation
                 if (email.isEmpty()){
@@ -51,7 +52,7 @@ public class FirstPageActivity extends AppCompatActivity {
                     userPassword.requestFocus();
                 }
                 else if (email.isEmpty() && pwd.isEmpty()){
-                    Toast.makeText(FirstPageActivity.this, "fields are emtpy", Toast.LENGTH_LONG);
+                    Toast.makeText(FirstPageActivity.this, "fields are emtpy", Toast.LENGTH_SHORT).show();
                 }
                 else if (!(email.isEmpty() && pwd.isEmpty())){
                     authenticationObject.createUserWithEmailAndPassword(email,pwd).addOnCompleteListener(FirstPageActivity.this, new OnCompleteListener<AuthResult>() {
@@ -59,15 +60,16 @@ public class FirstPageActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (!task.isSuccessful()){//or check if successful
-                                Toast.makeText(FirstPageActivity.this, "task failure", Toast.LENGTH_LONG);
+                                Toast.makeText(FirstPageActivity.this, "task failure "+ task.getException().getMessage(), Toast.LENGTH_LONG).show();
                             }else {
+                                Toast.makeText(FirstPageActivity.this, "User Created ", Toast.LENGTH_LONG).show();
                                 startActivity(new Intent(FirstPageActivity.this, HomeActivity.class));
                             }
                         }
                     });
                 }
                 else {
-                    Toast.makeText(FirstPageActivity.this, "fatality!!!!! ", Toast.LENGTH_LONG);
+                    Toast.makeText(FirstPageActivity.this, "fatality!!!!! ", Toast.LENGTH_LONG).show();
                 }
             }
         });
