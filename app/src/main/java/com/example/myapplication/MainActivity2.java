@@ -9,25 +9,20 @@ import android.widget.Button;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-public class HomeActivity extends AppCompatActivity {
+public class MainActivity2 extends AppCompatActivity {
 
-    Button logoutButton;
-    FirebaseAuth authenticationObject;
-
-    private FirebaseAuth.AuthStateListener authenticationListener;
+    Button logoutButtton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home2);
-
-        logoutButton = findViewById(R.id.logoutButton);
-
-        logoutButton.setOnClickListener(new View.OnClickListener() {
+        setContentView(R.layout.activity_main2);
+        logoutButtton  =findViewById(R.id.logOutButton);
+        logoutButtton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
-                Intent advanceFirstPage = new Intent(HomeActivity.this, FirstPageActivity.class);
+                Intent advanceFirstPage = new Intent(MainActivity2.this, Login1.class);
                 startActivity(advanceFirstPage);
             }
         });
