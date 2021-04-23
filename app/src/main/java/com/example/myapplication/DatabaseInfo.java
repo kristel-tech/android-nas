@@ -47,6 +47,12 @@ public class DatabaseInfo {
             case BYDEVICEID:
                 SQL = encodeValue("SELECT * FROM FileHistory WHERE (SenderIP = ? AND ReceiverIP = ?) OR ReceiverIP = ? AND SenderIP = ? ORDER BY DateSent DESC;");
                 break;
+            case SMALLERTHANSIZE:
+                SQL = encodeValue("SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND FileSizeInMegabytes < ? ORDER BY DateSent DESC;");
+                break;
+            case LARGERTHANSIZE:
+                SQL = encodeValue("SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND FileSizeInMegabytes > ? ORDER BY DateSent DESC;");
+                break;
             case CREATE:
                 SQL = encodeValue("INSERT INTO FileHistory(SenderIP, ReceiverIP, FileSizeInMegabytes, DateSent, FileName) VALUES (?,?,?,CURRENT_TIMESTAMP,?);");
                 break;
@@ -110,6 +116,16 @@ public class DatabaseInfo {
                 values = CompileString(SenderIP,ReceiverIP, SenderIP,ReceiverIP);
                 needreturn = true;
 //                        SELECT * FROM FileHistory WHERE (SenderIP = ? AND ReceiverIP = ?) OR ReceiverIP = ? AND SenderIP = ? ORDER BY DateSent DESC;
+                break;
+            case SMALLERTHANSIZE:
+                values = CompileString(SenderIP,ReceiverIP, FileSizeInMegabytes);
+                needreturn = true;
+//                      SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND FileSizeInMegabytes < ? ORDER BY DateSent DESC;
+                break;
+            case LARGERTHANSIZE:
+                values = CompileString(SenderIP,ReceiverIP, FileSizeInMegabytes);
+                needreturn = true;
+//                      SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND FileSizeInMegabytes > ? ORDER BY DateSent DESC;
                 break;
             case CREATE:
                 values = CompileString(SenderIP,ReceiverIP, FileSizeInMegabytes,FileName);

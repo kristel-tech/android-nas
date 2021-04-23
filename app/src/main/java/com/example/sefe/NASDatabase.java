@@ -79,6 +79,46 @@ public class NASDatabase {
             closeConnection();
         }
     }
+    //this function returns all files smaller than a specified size in megabytes
+    public void ShowFilesBySizeSmaller(String OwnIPAddress, double filesizeinmegabytes)  throws SQLException {
+        try {
+            connection = DriverManager.getConnection(DatabaseURL, user, password);
+            String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND FileSizeInMegabytes < ? ORDER BY DateSent DESC;";
+            PreparedStatement datesearch = connection.prepareStatement(SQLQuery);
+            datesearch.setString(1, OwnIPAddress);
+            datesearch.setString(2, OwnIPAddress);
+            datesearch.setTimestamp(3, filesizeinmegabytes);
+            resultset = datesearch.executeQuery(SQLQuery);
+            while (resultset.next()) {
+                System.out.println(resultset.next());
+            }
+        } catch (SQLException sqlEx) {
+            sqlEx.printStackTrace();
+        }
+        finally {
+            closeConnection();
+        }
+    }
+    // this function returns all files larger than a specified size in megabytes
+    public void ShowFilesBySizeLarger(String OwnIPAddress, double filesizeinmegabytes)  throws SQLException {
+        try {
+            connection = DriverManager.getConnection(DatabaseURL, user, password);
+            String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND FileSizeInMegabytes > ? ORDER BY DateSent DESC;";
+            PreparedStatement datesearch = connection.prepareStatement(SQLQuery);
+            datesearch.setString(1, OwnIPAddress);
+            datesearch.setString(2, OwnIPAddress);
+            datesearch.setTimestamp(3, filesizeinmegabytes);
+            resultset = datesearch.executeQuery(SQLQuery);
+            while (resultset.next()) {
+                System.out.println(resultset.next());
+            }
+        } catch (SQLException sqlEx) {
+            sqlEx.printStackTrace();
+        }
+        finally {
+            closeConnection();
+        }
+    }
     //this function records when a file transfer between two devices takes place
 
     public void CreateFileRecord(String SenderIP, String ReceiverIP, double FileSizeInMegabytes, String filename) throws SQLException {
