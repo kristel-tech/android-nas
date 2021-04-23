@@ -85,29 +85,40 @@ public class DatabaseInfo {
         return "&len=" + String.valueOf(index) + concat;
     }
 
+    private String mustreturn(boolean returnsomething){
+        if (returnsomething)
+            return "&mustreturn=true";
+        else
+            return "&mustreturn=false";
+    }
+
     public String getRequestFileHistoryData(){
         String values = "";
-
+        Boolean needreturn = true;
         switch(callType){
             case FILESBYDATE:
                 values = CompileString(SenderIP,ReceiverIP, DateSent);
+                needreturn = true;
 //                        SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND DateSent = ? ORDER BY DateSent DESC;
                 break;
             case SHOWFILEHISTORY:
                 values = CompileString(SenderIP,ReceiverIP, DateSent);
+                needreturn = true;
 //                        SELECT * FROM FileHistory WHERE SenderIP = ? OR ReceiverIP = ? ORDER BY DateSent DESC;
                 break;
             case BYDEVICEID:
                 values = CompileString(SenderIP,ReceiverIP, SenderIP,ReceiverIP);
+                needreturn = true;
 //                        SELECT * FROM FileHistory WHERE (SenderIP = ? AND ReceiverIP = ?) OR ReceiverIP = ? AND SenderIP = ? ORDER BY DateSent DESC;
                 break;
             case CREATE:
                 values = CompileString(SenderIP,ReceiverIP, FileSizeInMegabytes,FileName);
+                needreturn = false;
 //                        INSERT INTO FileHistory(SenderIP, ReceiverIP, FileSizeInMegabytes, DateSent, FileName) VALUES (?,?,?,CURRENT_TIMESTAMP,?) ORDER BY DateSent DESC;
                 break;
         }
 
-        return strMessage+"?SQL="+SQL+values;
+        return strMessage+"?SQL="+SQL+mustreturn(needreturn)+values;
     }
 
     public static String decodeValue(String value) {
