@@ -8,5 +8,14 @@ CREATE TABLE FileHistory (
                              PRIMARY KEY (TransactionKey)
 );
 
+CREATE TABLE LoginTable (
+                             UserName varchar(20) NOT NULL,
+                             Password varchar(20) NOT NULL,
+                             PRIMARY KEY (UserName)
+);
 
-SELECT * FROM FileHistory;
+
+INSERT INTO LoginTable(UserName, Password) VALUES ("khutjo","1234a%");
+INSERT INTO LoginTable(UserName, Password) VALUES ("kerane","5678b%");
+INSERT INTO LoginTable(UserName, Password) VALUES ("tshiamo","1234c%");
+INSERT INTO LoginTable(UserName, Password) VALUES ("armin","5678d%");

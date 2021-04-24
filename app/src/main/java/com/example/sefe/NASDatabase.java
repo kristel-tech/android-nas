@@ -13,14 +13,40 @@ public class NASDatabase {
     private static Connection connection;
     private static Statement statement;
     private static ResultSet resultset;
+    private static string currentIP;
 
-    //this function returns the records of file transfers between two devices
-    //the device that requests this function can have its IP address sourced by a WifiManager object,
-    // while the IP address of the other device must be provided
 
+    //this function facilitates the login of a user into the NAS
+    //the device that requests this function can have its IP address sourced by a WifiManager object
+    public void Login(String username, String Password) throws SQLException {
+        try {
+            connection = DriverManager.getConnection(DatabaseURL, user, password);
+            String SQLQuery = "SELECT * FROM LoginTable WHERE UserName = ? AND Password = ?;";
+            PreparedStatement logger = connection.prepareStatement(SQLQuery);
+            logger.setString(1, username);
+            logger.setString(2, Password);
+            resultset = logger.executeQuery(SQLQuery);
+            if (!resultset)
+                closeConnection();
+            else {
+                WifiManager wifi;
+                currentIP = wifi.localIP();
+            }
+        }
+        catch (SQLException sqlEx) {
+            sqlEx.printStackTrace();
+        }
+    }
+    public boolean checkIP(string sourcedIP) {
+        if(sourcedIP != currentIP )
+            return false;
+        return true;
+    }
     public void ShowFilesByDeviceID(String DeviceIPAddress, String OwnIPAddress) throws SQLException {
         try {
             connection = DriverManager.getConnection(DatabaseURL, user, password);
+            if(!checkIP(OwnIPAddress))
+                closeConnection();
             String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = ? AND ReceiverIP = ?) OR ReceiverIP = ? AND SenderIP = ?;";
             PreparedStatement identity = connection.prepareStatement(SQLQuery);
             identity.setString(1, OwnIPAddress);
@@ -43,6 +69,8 @@ public class NASDatabase {
     public void ShowFileHistory(String OwnIPAddress)  throws SQLException {
         try {
             connection = DriverManager.getConnection(DatabaseURL, user, password);
+            if(!checkIP(OwnIPAddress))
+                closeConnection();
             String SQLQuery = "SELECT * FROM FileHistory WHERE SenderIP = ? OR ReceiverIP = ?;";
             PreparedStatement filehistory = connection.prepareStatement(SQLQuery);
             filehistory.setString(1, OwnIPAddress);
@@ -63,6 +91,8 @@ public class NASDatabase {
     public void ShowFilesByDate(String OwnIPAddress, Timestamp filedate)  throws SQLException {
         try {
             connection = DriverManager.getConnection(DatabaseURL, user, password);
+            if(!checkIP(OwnIPAddress))
+                closeConnection();
             String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND DateSent = ?;";
             PreparedStatement datesearch = connection.prepareStatement(SQLQuery);
             datesearch.setString(1, OwnIPAddress);
@@ -83,6 +113,8 @@ public class NASDatabase {
     public void ShowFilesBySizeSmaller(String OwnIPAddress, double filesizeinmegabytes)  throws SQLException {
         try {
             connection = DriverManager.getConnection(DatabaseURL, user, password);
+            if(!checkIP(OwnIPAddress))
+                closeConnection();
             String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND FileSizeInMegabytes < ? ORDER BY DateSent DESC;";
             PreparedStatement datesearch = connection.prepareStatement(SQLQuery);
             datesearch.setString(1, OwnIPAddress);
@@ -103,6 +135,8 @@ public class NASDatabase {
     public void ShowFilesBySizeLarger(String OwnIPAddress, double filesizeinmegabytes)  throws SQLException {
         try {
             connection = DriverManager.getConnection(DatabaseURL, user, password);
+            if(!checkIP(OwnIPAddress))
+                closeConnection();
             String SQLQuery = "SELECT * FROM FileHistory WHERE (SenderIP = ? OR ReceiverIP = ?) AND FileSizeInMegabytes > ? ORDER BY DateSent DESC;";
             PreparedStatement datesearch = connection.prepareStatement(SQLQuery);
             datesearch.setString(1, OwnIPAddress);

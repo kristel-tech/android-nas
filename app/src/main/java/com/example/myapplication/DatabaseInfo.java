@@ -56,6 +56,8 @@ public class DatabaseInfo {
             case CREATE:
                 SQL = encodeValue("INSERT INTO FileHistory(SenderIP, ReceiverIP, FileSizeInMegabytes, DateSent, FileName) VALUES (?,?,?,CURRENT_TIMESTAMP,?);");
                 break;
+            case LOGIN:
+                SQL = encodeValue("SELECT * FROM LoginTable WHERE UserName = ? AND Password = ?;");
         }
     }
 
@@ -131,6 +133,12 @@ public class DatabaseInfo {
                 values = CompileString(SenderIP,ReceiverIP, FileSizeInMegabytes,FileName);
                 needreturn = false;
 //                        INSERT INTO FileHistory(SenderIP, ReceiverIP, FileSizeInMegabytes, DateSent, FileName) VALUES (?,?,?,CURRENT_TIMESTAMP,?) ORDER BY DateSent DESC;
+                break;
+
+            case LOGIN:
+                values = CompileString(username,Password);
+                needreturn = true;
+                // SELECT * FROM LoginTable WHERE UserName = ? AND Password = ?;
                 break;
         }
 
