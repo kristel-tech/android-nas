@@ -13,11 +13,26 @@ public class MainActivity2 extends AppCompatActivity {
 
     Button logoutButtton;
 
+    Button active;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
         logoutButtton  =findViewById(R.id.logOutButton);
+
+        active = findViewById(R.id.button);
+
+        active.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                Intent advanceFirstPage = new Intent(MainActivity2.this, MainActivity.class);
+                startActivity(advanceFirstPage);
+            }
+        });
+
+
         logoutButtton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
