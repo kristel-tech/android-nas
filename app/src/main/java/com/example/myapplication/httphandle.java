@@ -6,9 +6,14 @@ import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class httphandle extends Thread {
 
@@ -19,9 +24,10 @@ public class httphandle extends Thread {
     ServerSocket Server;
     Socket connectedClient;
 
+
     BufferedReader inFromClient = null;
     DataOutputStream outToClient = null;
-
+    static String response = "";
 
     public void run(){
 
@@ -67,12 +73,14 @@ public class httphandle extends Thread {
 //            StringTokenizer tokenizer = new StringTokenizer(headerLine);
 //            String httpMethod = tokenizer.nextToken();
 //            String httpQueryString = tokenizer.nextToken();
+            if (headerLine == null)
+                return;
             String[] requeststring =  headerLine.replaceAll (" HTTP/1.1", "").split("/", 3);
 //            String[] requeststring1 =  headerLine.substring(1).split("/", 3);
-            for(String i : requeststring)
-                Log.d("MyApp","========================>"+i+"<============================");
+//            for(String i : requeststring)
+//                Log.d("MyApp","========================>"+i+"<============================");
 
-            Log.d("MyApp","========================>"+requeststring.length + "=======" +requeststring[0] + "<=====>" + requeststring[1] + "<===> "+ headerLine+"<============================");
+//            Log.d("MyApp","========================>"+requeststring.length + "=======" +requeststring[0] + "<=====>" + requeststring[1] + "<===> "+ headerLine+"<============================");
             StringBuffer responseBuffer = new StringBuffer();
             responseBuffer.append("<b> This is the HTTP Server Home Page.... </b><BR>");
             responseBuffer.append("The HTTP Client request is ....<BR>");
@@ -85,8 +93,23 @@ public class httphandle extends Thread {
                 requestString = inFromClient.readLine();
             }
 
-            if (requeststring[0].trim().equals("GET")) {
-                if (requeststring[1].trim().equals("List")){
+            if (requeststring.length >= 2 && requeststring[0].trim().equals("GET")) {
+
+                boolean CheckIfLoggedIn = false;
+                try {
+                    if (requeststring[1].trim().equals("List"))
+                        CheckIfLoggedIn = checklogin(requeststring[2].trim());
+                    else if (requeststring[1].trim().equals("getfile"))
+                        CheckIfLoggedIn = checklogin(requeststring[3].trim());
+                }catch (Exception e){
+                    CheckIfLoggedIn = false;
+                }
+
+                if (!CheckIfLoggedIn){
+                    sendResponse(403, httphandle.HTML_START + "<b>Forbidden</b>" + httphandle.HTML_END, false);
+                }
+                else if (requeststring[1].trim().equals("List")){
+
 
                     String filesPath = Environment.getExternalStorageDirectory().getAbsolutePath().toString();
 //                    Log.d("Files", "Path: " + path);
@@ -103,6 +126,7 @@ public class httphandle extends Thread {
                         sendResponse(200, returnString, false);
                 }
                 else if (requeststring[1].trim().equals("getfile")){
+
                     ContentResolver resolver = MainActivity.getAppContext().getContentResolver();
                     DocumentFile docfile = filehandleobj.getInstence().getDocfiles(Integer.valueOf(requeststring[2]));
                     InputStream InputStream  = resolver.openInputStream(docfile.getUri());
@@ -132,6 +156,8 @@ public class httphandle extends Thread {
             e.printStackTrace();
         }
     }
+
+
 
     public void sendResponse(int statusCode, String responseString, boolean isFile) throws Exception {
 
@@ -183,7 +209,26 @@ public class httphandle extends Thread {
         fin.close();
     }
 
+    public static boolean checklogin(String UID) throws ExecutionException, InterruptedException, JSONException {
 
 
+        DatabaseInfo DBDataInst = new DatabaseInfo();
+        DBDataInst.SQLCall(DBCallType.GETLOGIN);
+        DBDataInst.setLoginPostData(UID);
+        System.out.println(DBDataInst.getRequestFileHistoryData());
+        NASDatabase DBInst = new NASDatabase(DBDataInst);
+
+        DBInst.execute().get();
+        String in = DBDataInst.getResult().substring(1, DBDataInst.getResult().length() - 1);
+        JSONObject reader = new JSONObject(in);
+
+//        JSONObject c = reader.getJSONObject(0);
+        String UserName = reader.getString("UserName");
+
+        if (UserName.equals(UID))
+            return true;
+
+        return false;
+    }
 
 }

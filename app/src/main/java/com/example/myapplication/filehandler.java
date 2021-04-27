@@ -29,7 +29,6 @@ public class filehandler extends AppCompatActivity {
 
     public filehandler() {
 
-        setContentView(R.layout.activity_maindos);
     }
 
     public void navigateToAppDirectory() {
