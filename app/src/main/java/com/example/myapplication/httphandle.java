@@ -1,5 +1,11 @@
 package com.example.myapplication;
 
+import android.content.ContentResolver;
+import android.os.Environment;
+import android.util.Log;
+
+import androidx.documentfile.provider.DocumentFile;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -17,7 +23,33 @@ public class httphandle extends Thread {
     DataOutputStream outToClient = null;
 
 
-    public void run() {
+    public void run(){
+
+        ServerSocket Server = null;
+        try {
+            Server = new ServerSocket(5000, 10, InetAddress.getByName("127.0.0.1"));
+            Log.d("MyApp","====================================================");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        while (true) {
+
+            try {
+//                ServerSocket Server = new ServerSocket(5000, 10, InetAddress.getByName("127.0.0.1"));
+                while (true) {
+                    connectedClient = Server.accept();
+                    runsocket();
+
+                }
+            }catch(Exception e) {
+                System.out.println("shit happens");
+                System.out.println(e);
+            }
+        }
+    }
+
+    public void runsocket() {
 
         try {
 
@@ -26,14 +58,21 @@ public class httphandle extends Thread {
 
             inFromClient = new BufferedReader(new InputStreamReader(connectedClient.getInputStream()));
             outToClient = new DataOutputStream(connectedClient.getOutputStream());
-
+            System.out.println();
             String requestString = inFromClient.readLine();
+
+
             String headerLine = requestString;
 
-            StringTokenizer tokenizer = new StringTokenizer(headerLine);
-            String httpMethod = tokenizer.nextToken();
-            String httpQueryString = tokenizer.nextToken();
+//            StringTokenizer tokenizer = new StringTokenizer(headerLine);
+//            String httpMethod = tokenizer.nextToken();
+//            String httpQueryString = tokenizer.nextToken();
+            String[] requeststring =  headerLine.replaceAll (" HTTP/1.1", "").split("/", 3);
+//            String[] requeststring1 =  headerLine.substring(1).split("/", 3);
+            for(String i : requeststring)
+                Log.d("MyApp","========================>"+i+"<============================");
 
+            Log.d("MyApp","========================>"+requeststring.length + "=======" +requeststring[0] + "<=====>" + requeststring[1] + "<===> "+ headerLine+"<============================");
             StringBuffer responseBuffer = new StringBuffer();
             responseBuffer.append("<b> This is the HTTP Server Home Page.... </b><BR>");
             responseBuffer.append("The HTTP Client request is ....<BR>");
@@ -46,24 +85,49 @@ public class httphandle extends Thread {
                 requestString = inFromClient.readLine();
             }
 
-            if (httpMethod.equals("GET")) {
-                if (httpQueryString.equals("/")) {
-                    // The default home page
-                    sendResponse(200, responseBuffer.toString(), false);
-                } else {
-                    // This is interpreted as a file name
-                    String fileName = httpQueryString.replaceFirst("/", "");
-                    fileName = URLDecoder.decode(fileName);
-                    if (new File(fileName).isFile()) {
-                        sendResponse(200, fileName, true);
-                    } else {
-                        sendResponse(404, "<b>The Requested resource not found ...."
-                                + "Usage: http://127.0.0.1:5000 or http://127.0.0.1:5000/</b>", false);
+            if (requeststring[0].trim().equals("GET")) {
+                if (requeststring[1].trim().equals("List")){
+
+                    String filesPath = Environment.getExternalStorageDirectory().getAbsolutePath().toString();
+//                    Log.d("Files", "Path: " + path);
+                    File directory = new File(filesPath);
+                    File[] files = directory.listFiles();
+//
+                    String returnString = new String();
+                    int file_size = 0;
+                    for (int i = 0; i < files.length; i++)
+                    {
+                        returnString = filehandleobj.getInstence().getJsonList();
+//
                     }
+                        sendResponse(200, returnString, false);
                 }
-            } else
-                sendResponse(404, "<b>The Requested resource not found ...."
-                        + "Usage: http://127.0.0.1:5000 or http://127.0.0.1:5000/</b>", false);
+                else if (requeststring[1].trim().equals("getfile")){
+                    ContentResolver resolver = MainActivity.getAppContext().getContentResolver();
+                    DocumentFile docfile = filehandleobj.getInstence().getDocfiles(Integer.valueOf(requeststring[2]));
+                    InputStream InputStream  = resolver.openInputStream(docfile.getUri());
+
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(InputStream));
+
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String currentline;
+                    while ((currentline = reader.readLine()) != null) {
+                        stringBuilder.append(currentline + "\n");
+                    }
+
+                    Log.d("MyApp","===================>"+stringBuilder+" <===================");
+//                    outToClient.writeBytes(stringBuilder.toString());
+//                    outToClient.close();
+                    InputStream.close();
+
+                    sendResponse(200, stringBuilder.toString(), false);
+                }else {
+                        sendResponse(404, httphandle.HTML_START + "<b>The Requested resource not found ...."
+                                + "Usage: http://127.0.0.1:5000 or http://127.0.0.1:5000/</b>" + httphandle.HTML_END, false);
+                }
+            }else
+                sendResponse(404, httphandle.HTML_START + "<b>The Requested resource not found ...."
+                        + "Usage: http://127.0.0.1:5000 or http://127.0.0.1:5000/</b>" + httphandle.HTML_END, false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -90,7 +154,7 @@ public class httphandle extends Thread {
             if (!fileName.endsWith(".htm") && !fileName.endsWith(".html"))
                 contentTypeLine = "Content-Type: \r\n";
         } else {
-            responseString = httphandle.HTML_START + responseString + httphandle.HTML_END;
+            responseString = responseString;
             contentLengthLine = "Content-Length: " + responseString.length() + "\r\n";
         }
 
@@ -119,9 +183,7 @@ public class httphandle extends Thread {
         fin.close();
     }
 
-    public httphandle(Socket client) {
-        connectedClient = client;
-    }
+
 
 
 }
