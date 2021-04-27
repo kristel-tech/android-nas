@@ -75,7 +75,7 @@ public class httphandle extends Thread {
 //            String httpQueryString = tokenizer.nextToken();
             if (headerLine == null)
                 return;
-            String[] requeststring =  headerLine.replaceAll (" HTTP/1.1", "").split("/", 3);
+            String[] requeststring =  headerLine.replaceAll (" HTTP/1.1", "").split("/", 4);
 //            String[] requeststring1 =  headerLine.substring(1).split("/", 3);
 //            for(String i : requeststring)
 //                Log.d("MyApp","========================>"+i+"<============================");
@@ -94,7 +94,8 @@ public class httphandle extends Thread {
             }
 
             if (requeststring.length >= 2 && requeststring[0].trim().equals("GET")) {
-
+//                for(String i : requeststring)
+//                Log.d("MyApp",i);
                 boolean CheckIfLoggedIn = false;
                 try {
                     if (requeststring[1].trim().equals("List"))
@@ -109,21 +110,9 @@ public class httphandle extends Thread {
                     sendResponse(403, httphandle.HTML_START + "<b>Forbidden</b>" + httphandle.HTML_END, false);
                 }
                 else if (requeststring[1].trim().equals("List")){
-
-
-                    String filesPath = Environment.getExternalStorageDirectory().getAbsolutePath().toString();
-//                    Log.d("Files", "Path: " + path);
-                    File directory = new File(filesPath);
-                    File[] files = directory.listFiles();
-//
                     String returnString = new String();
-                    int file_size = 0;
-                    for (int i = 0; i < files.length; i++)
-                    {
-                        returnString = filehandleobj.getInstence().getJsonList();
-//
-                    }
-                        sendResponse(200, returnString, false);
+                    returnString = filehandleobj.getInstence().getJsonList();
+                    sendResponse(200, returnString, false);
                 }
                 else if (requeststring[1].trim().equals("getfile")){
 
